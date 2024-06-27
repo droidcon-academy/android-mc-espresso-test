@@ -163,7 +163,7 @@ fun FlixItem(flix: Flix, onFlixClicked: (Flix) -> Unit) {
             .clickable {
                 onFlixClicked(flix)
             }
-            .testTag("card")
+            .testTag("flixItem")
     ) {
         ConstraintLayout(
             modifier = Modifier.fillMaxSize()

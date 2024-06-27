@@ -7,10 +7,14 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextInput
+import androidx.test.espresso.accessibility.AccessibilityChecks
+import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.Intents.intending
@@ -24,6 +28,8 @@ import androidx.test.espresso.web.webdriver.Locator
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.droidcon.droidflix.ui.DroidFlixApp
 import com.droidcon.droidflix.ui.theme.DroidFlixTheme
+import com.droidcon.droidflix.utils.assertContainsIgnoreCase
+import com.droidcon.droidflix.utils.containsStringCaseInsensitive
 import com.mikepenz.aboutlibraries.ui.LibsActivity
 import org.hamcrest.core.AllOf.allOf
 import org.junit.Before
@@ -40,6 +46,10 @@ import org.junit.Rule
  */
 @RunWith(AndroidJUnit4::class)
 class ExampleInstrumentedTest {
+
+    init {
+        AccessibilityChecks.enable().setRunChecksFromRootView(true)
+    }
 
     @get:Rule val composeTestRule = createComposeRule()
     // use createAndroidComposeRule<YourActivity>() if you need access to
@@ -60,6 +70,7 @@ class ExampleInstrumentedTest {
         composeTestRule.onNodeWithText("Search for movies…").assertIsDisplayed()
         composeTestRule.onNodeWithTag("search").performTextInput("red")
         composeTestRule.onNodeWithTag("search").assert(hasText("red"))
+        closeSoftKeyboard()
         composeTestRule.onNodeWithTag("loader").assertIsDisplayed()
         composeTestRule.onNodeWithText("Search for movies…").assertIsNotDisplayed()
 
@@ -67,6 +78,37 @@ class ExampleInstrumentedTest {
             composeTestRule.onNodeWithTag("list").fetchSemanticsNode().children.size > 1
         }
 
+
+        composeTestRule.onAllNodesWithTag("flixItem")[0].performClick()
+
+        composeTestRule.waitUntil(5_000) {
+            composeTestRule
+                .onAllNodesWithTag("title")
+                .fetchSemanticsNodes().size == 1
+        }
+
+        composeTestRule.onNodeWithTag("list").assertIsNotDisplayed()
+        composeTestRule.onNodeWithTag("image").assertIsDisplayed()
+        composeTestRule.onNode(containsStringCaseInsensitive("ReD")).assertExists()
+        composeTestRule.onNodeWithTag("title").assertContainsIgnoreCase("rEd")
+        composeTestRule.onNodeWithTag("year").assert(hasText("2010"))
+    }
+
+    @Test
+    fun checkInfinityScroll() {
+        composeTestRule.onNodeWithTag("search").performTextInput("red")
+        composeTestRule.onNodeWithTag("search").assert(hasText("red"))
+        closeSoftKeyboard()
+
+        composeTestRule.waitUntil(5_000) {
+            composeTestRule.onNodeWithTag("list").fetchSemanticsNode().children.size > 1
+        }
+
+        val currentSize = composeTestRule.onNodeWithTag("list").fetchSemanticsNode().children.size
+        composeTestRule.onNodeWithTag("list").performScrollToIndex(currentSize - 1)
+        composeTestRule.waitUntil(5_000) {
+            composeTestRule.onNodeWithTag("list").fetchSemanticsNode().children.size > currentSize
+        }
     }
 
     @Test

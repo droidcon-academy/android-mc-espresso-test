@@ -11,7 +11,6 @@ import io.ktor.client.features.logging.Logging
 import io.ktor.client.request.get
 import io.ktor.client.request.url
 import io.ktor.client.statement.HttpResponse
-import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.json.Json
 import com.droidcon.droidflix.data.model.Flix
 import com.droidcon.droidflix.data.model.OMDBResponse

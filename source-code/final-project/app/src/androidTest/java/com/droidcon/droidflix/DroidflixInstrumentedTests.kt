@@ -2,6 +2,7 @@ package com.droidcon.droidflix
 
 import android.app.Activity.RESULT_OK
 import android.app.Instrumentation
+import android.content.Intent
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
@@ -18,7 +19,12 @@ import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.Intents.intending
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasData
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasDataString
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasType
 import androidx.test.espresso.web.sugar.Web.onWebView
 import androidx.test.espresso.web.webdriver.DriverAtoms
 import androidx.test.espresso.web.webdriver.DriverAtoms.clearElement
@@ -31,6 +37,7 @@ import com.droidcon.droidflix.ui.theme.DroidFlixTheme
 import com.droidcon.droidflix.utils.assertContainsIgnoreCase
 import com.droidcon.droidflix.utils.containsStringCaseInsensitive
 import com.mikepenz.aboutlibraries.ui.LibsActivity
+import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.core.AllOf.allOf
 import org.junit.Before
 
@@ -45,7 +52,7 @@ import org.junit.Rule
  * See [testing documentation](http://d.android.com/tools/testing).
  */
 @RunWith(AndroidJUnit4::class)
-class ExampleInstrumentedTest {
+class DroidflixInstrumentedTests {
 
     init {
         AccessibilityChecks.enable().setRunChecksFromRootView(true)
@@ -77,7 +84,6 @@ class ExampleInstrumentedTest {
         composeTestRule.waitUntil(5_000) {
             composeTestRule.onNodeWithTag("list").fetchSemanticsNode().children.size > 1
         }
-
 
         composeTestRule.onAllNodesWithTag("flixItem")[0].performClick()
 
@@ -122,6 +128,46 @@ class ExampleInstrumentedTest {
         composeTestRule.onNodeWithTag("options").performClick()
         composeTestRule.onNodeWithTag("libraries").performClick()
         intended(expectedIntent)
+        Intents.release()
+    }
+
+    @Test
+    fun checkShare() {
+        composeTestRule.onNodeWithTag("search").performTextInput("red")
+        composeTestRule.onNodeWithTag("search").assert(hasText("red"))
+        closeSoftKeyboard()
+
+        composeTestRule.waitUntil(5_000) {
+            composeTestRule.onNodeWithTag("list").fetchSemanticsNode().children.size > 1
+        }
+
+        composeTestRule.onAllNodesWithTag("flixItem")[0].performClick()
+
+        composeTestRule.waitUntil(5_000) {
+            composeTestRule
+                .onAllNodesWithTag("title")
+                .fetchSemanticsNodes().size == 1
+        }
+
+        Intents.init()
+
+        val expectedIntent = allOf(
+            hasAction(Intent.ACTION_SEND),
+            hasType("text/plain"),
+            hasExtra(Intent.EXTRA_TEXT, "https://www.imdb.com/title/tt1245526")
+        )
+
+        val chooserIntent = allOf(
+            hasAction(Intent.ACTION_CHOOSER),
+            hasExtra(equalTo(Intent.EXTRA_INTENT), expectedIntent)
+        )
+
+        val result = Instrumentation.ActivityResult(RESULT_OK, null)
+        intending(chooserIntent).respondWith(result)
+
+        composeTestRule.onNodeWithTag("share").performClick()
+
+        intended(chooserIntent)
         Intents.release()
     }
 

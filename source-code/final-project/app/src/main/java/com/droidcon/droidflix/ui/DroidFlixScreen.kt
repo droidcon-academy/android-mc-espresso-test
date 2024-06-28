@@ -1,9 +1,11 @@
 package com.droidcon.droidflix.ui
 
+import android.content.Intent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -15,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +44,7 @@ fun DroidFlixAppBar(
     currentScreen: FlixNav,
     canNavigateBack: Boolean,
     navController: NavHostController,
+    viewModel: FlixViewModel,
     modifier: Modifier = Modifier,
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -101,6 +105,26 @@ fun DroidFlixAppBar(
                         }
                     )
                 }
+            } else if (currentScreen == FlixNav.FlixDetail) {
+                val flix by viewModel.flix.collectAsState()
+                val action = stringResource(R.string.share)
+                IconButton(
+                    modifier = Modifier
+                        .testTag("share"),
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, "https://www.imdb.com/title/${flix?.id}")
+                        }
+                        val chooserIntent = Intent.createChooser(intent, action)
+                        context.startActivity(chooserIntent)
+                    }
+                ) {
+                    Icon(
+                        Icons.Default.Share,
+                        contentDescription = action
+                    )
+                }
             }
         }
     )
@@ -121,7 +145,8 @@ fun DroidFlixApp(
             DroidFlixAppBar(
                 currentScreen = currentScreen,
                 canNavigateBack = navController.previousBackStackEntry != null,
-                navController = navController
+                navController = navController,
+                viewModel = viewModel
             )
         }
     ) { innerPadding ->

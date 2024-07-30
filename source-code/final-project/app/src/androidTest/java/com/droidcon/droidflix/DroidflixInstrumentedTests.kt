@@ -82,7 +82,7 @@ class DroidflixInstrumentedTests {
         composeTestRule.onNodeWithText("Search for movies…").assertIsNotDisplayed()
 
         composeTestRule.waitUntil(5_000) {
-            composeTestRule.onNodeWithTag("list").fetchSemanticsNode().children.size > 1
+            composeTestRule.onAllNodesWithTag("flixItem").fetchSemanticsNodes().isNotEmpty()
         }
 
         composeTestRule.onAllNodesWithTag("flixItem")[0].performClick()
@@ -95,9 +95,9 @@ class DroidflixInstrumentedTests {
 
         composeTestRule.onNodeWithTag("list").assertIsNotDisplayed()
         composeTestRule.onNodeWithTag("image").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("year").assert(hasText("2010"))
         composeTestRule.onNode(containsStringCaseInsensitive("ReD")).assertExists()
         composeTestRule.onNodeWithTag("title").assertContainsIgnoreCase("rEd")
-        composeTestRule.onNodeWithTag("year").assert(hasText("2010"))
     }
 
     @Test

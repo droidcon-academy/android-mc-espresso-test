@@ -21,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -40,21 +41,6 @@ fun FlixListScreen(
     viewModel: FlixViewModel,
     onFlixClicked: (Flix) -> Unit,
 ) {
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_START) {
-                viewModel.getFlix(page = 1)
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
-
-
-
     InfiniteFlixList(
         viewModel = viewModel,
         onFlixClicked = onFlixClicked,
@@ -77,6 +63,19 @@ fun InfiniteFlixList(
         viewModel.getFlix(searchText, page = viewModel.currentPage + 1)
     }
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_START && searchText.isNotBlank()) {
+                viewModel.getFlix(searchText, page = 1)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     ConstraintLayout(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -91,6 +90,7 @@ fun InfiniteFlixList(
                         end.linkTo(parent.end)
                         bottom.linkTo(parent.bottom)
                     }
+                    .testTag("loader")
             )
         } else if (
             searchText.isBlank() ||
@@ -112,6 +112,7 @@ fun InfiniteFlixList(
                         start.linkTo(parent.start)
                         bottom.linkTo(parent.bottom)
                     }
+                    .testTag("info")
             )
         }
 
@@ -129,6 +130,7 @@ fun InfiniteFlixList(
                     end.linkTo(parent.end, margin = 16.dp)
                     width = Dimension.fillToConstraints
                 }
+                .testTag("search")
         )
 
         InfiniteScrollList(
@@ -140,7 +142,8 @@ fun InfiniteFlixList(
                     start.linkTo(parent.start)
                     bottom.linkTo(parent.bottom)
                     height = Dimension.fillToConstraints
-                },
+                }
+                .testTag("list"),
             itemCount = flix.size,
             loadMoreItems = {
                 loadMoreItems.invoke()
@@ -160,6 +163,7 @@ fun FlixItem(flix: Flix, onFlixClicked: (Flix) -> Unit) {
             .clickable {
                 onFlixClicked(flix)
             }
+            .testTag("flixItem")
     ) {
         ConstraintLayout(
             modifier = Modifier.fillMaxSize()
@@ -176,7 +180,8 @@ fun FlixItem(flix: Flix, onFlixClicked: (Flix) -> Unit) {
                         top.linkTo(parent.top)
                         end.linkTo(parent.end)
                         start.linkTo(parent.start)
-                    },
+                    }
+                    .testTag("image"),
             )
             Text(
                 text = flix.title,
@@ -189,6 +194,7 @@ fun FlixItem(flix: Flix, onFlixClicked: (Flix) -> Unit) {
                         start.linkTo(parent.start)
                         bottom.linkTo(parent.bottom)
                     }
+                    .testTag("name")
             )
         }
     }

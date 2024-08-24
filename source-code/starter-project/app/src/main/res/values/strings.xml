@@ -2,12 +2,14 @@
     <string name="app_name">DroidFlix</string>
     <string name="details">Details</string>
     <string name="web">Web</string>
+    <string name="api">API</string>
     <string name="libraries">Libraries</string>
     <string name="back">Back</string>
     <string name="empty">Empty</string>
     <string name="search_for_movies">Search for movies…</string>
     <string name="search">Search</string>
     <string name="options">Options</string>
+    <string name="share">Share</string>
     <string name="plot">Plot</string>
     <string name="year">Year</string>
     <string name="ratings">Ratings</string>

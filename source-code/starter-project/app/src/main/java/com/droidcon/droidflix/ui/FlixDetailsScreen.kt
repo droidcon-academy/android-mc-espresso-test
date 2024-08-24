@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -136,7 +137,8 @@ fun FlixDetailsPortraitLayout(flix: Flix?, isLoading: Boolean) {
                         start.linkTo(parent.start)
                         bottom.linkTo(title.top)
                         height = Dimension.fillToConstraints
-                    },
+                    }
+                    .testTag("image")
             )
 
             Text(
@@ -147,7 +149,7 @@ fun FlixDetailsPortraitLayout(flix: Flix?, isLoading: Boolean) {
                         bottom.linkTo(parent.bottom)
                         start.linkTo(parent.start, margin = 8.dp)
                         end.linkTo(parent.end, margin = 8.dp)
-                    },
+                    }.testTag("title"),
                 textAlign = TextAlign.Center,
                 text = flix.title,
                 fontSize = 24.sp
@@ -158,7 +160,7 @@ fun FlixDetailsPortraitLayout(flix: Flix?, isLoading: Boolean) {
                     top.linkTo(title.bottom)
                     start.linkTo(parent.start, margin = 8.dp)
                     end.linkTo(parent.end, margin = 8.dp)
-                },
+                }.testTag("year"),
                 text = flix.year,
                 fontSize = 16.sp
             )
@@ -171,7 +173,7 @@ fun FlixDetailsPortraitLayout(flix: Flix?, isLoading: Boolean) {
                     bottom.linkTo(parent.bottom, margin = 16.dp)
                     height = Dimension.fillToConstraints
                     width = Dimension.fillToConstraints
-                },
+                }.testTag("pager"),
                 texts = texts
             )
         }

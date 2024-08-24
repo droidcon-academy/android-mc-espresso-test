@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -16,12 +17,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -41,6 +44,7 @@ fun DroidFlixAppBar(
     currentScreen: FlixNav,
     canNavigateBack: Boolean,
     navController: NavHostController,
+    viewModel: FlixViewModel,
     modifier: Modifier = Modifier,
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -64,7 +68,11 @@ fun DroidFlixAppBar(
         },
         actions = {
             if (currentScreen == FlixNav.FlixList) {
-                IconButton(onClick = { showMenu = !showMenu }) {
+                IconButton(
+                    modifier = Modifier
+                        .testTag("options"),
+                    onClick = { showMenu = !showMenu }
+                ) {
                     Icon(
                         Icons.Default.MoreVert,
                         contentDescription = stringResource(R.string.options)
@@ -74,18 +82,48 @@ fun DroidFlixAppBar(
                     expanded = showMenu,
                     onDismissRequest = { showMenu = false }
                 ) {
-                    DropdownMenuItem(text = {
-                        Text(text = stringResource(R.string.web))
-                    }, onClick = {
-                        showMenu = false
-                        navController.navigate(FlixNav.FlixWeb.route)
-                    })
-                    DropdownMenuItem(text = {
-                        Text(text = stringResource(R.string.libraries))
-                    }, onClick = {
-                        showMenu = false
-                        LibsBuilder().start(context)
-                    })
+                    DropdownMenuItem(
+                        modifier = Modifier
+                            .testTag("api"),
+                        text = {
+                            Text(text = stringResource(R.string.api))
+                        },
+                        onClick = {
+                            showMenu = false
+                            navController.navigate(FlixNav.FlixWeb.route)
+                        }
+                    )
+                    DropdownMenuItem(
+                        modifier = Modifier
+                            .testTag("libraries"),
+                        text = {
+                            Text(text = stringResource(R.string.libraries))
+                        },
+                        onClick = {
+                            showMenu = false
+                            LibsBuilder().start(context)
+                        }
+                    )
+                }
+            } else if (currentScreen == FlixNav.FlixDetail) {
+                val flix by viewModel.flix.collectAsState()
+                val action = stringResource(R.string.share)
+                IconButton(
+                    modifier = Modifier
+                        .testTag("share"),
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, "https://www.imdb.com/title/${flix?.id}")
+                        }
+                        val chooserIntent = Intent.createChooser(intent, action)
+                        context.startActivity(chooserIntent)
+                    }
+                ) {
+                    Icon(
+                        Icons.Default.Share,
+                        contentDescription = action
+                    )
                 }
             }
         }
@@ -107,7 +145,8 @@ fun DroidFlixApp(
             DroidFlixAppBar(
                 currentScreen = currentScreen,
                 canNavigateBack = navController.previousBackStackEntry != null,
-                navController = navController
+                navController = navController,
+                viewModel = viewModel
             )
         }
     ) { innerPadding ->

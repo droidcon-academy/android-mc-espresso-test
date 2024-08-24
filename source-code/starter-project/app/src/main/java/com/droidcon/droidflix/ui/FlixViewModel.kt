@@ -19,7 +19,7 @@ class FlixViewModel: ViewModel() {
     val flix: StateFlow<Flix?> = _flix
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
-    private val _loading = MutableStateFlow(true)
+    private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
     var currentPage = 1
     private var debounceJob: Job? = null

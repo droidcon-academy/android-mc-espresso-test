@@ -17,6 +17,7 @@ fun FlixWebScreen() {
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
             this.webViewClient = CustomWebViewClient()
+            this.settings.javaScriptEnabled = true
         }
     }, update = {
         it.loadUrl(mUrl)
@@ -26,5 +27,8 @@ fun FlixWebScreen() {
 class CustomWebViewClient: WebViewClient(){
     override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
         return url != null && url.startsWith("https://www.omdbapi.com/")
+    }
+    override fun onPageFinished(view: WebView?, url: String?) {
+        super.onPageFinished(view, url)
     }
 }

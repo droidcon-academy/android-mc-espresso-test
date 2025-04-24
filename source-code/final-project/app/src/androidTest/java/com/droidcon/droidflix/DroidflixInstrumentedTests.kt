@@ -95,9 +95,9 @@ class DroidflixInstrumentedTests {
 
         composeTestRule.onNodeWithTag("list").assertIsNotDisplayed()
         composeTestRule.onNodeWithTag("image").assertIsDisplayed()
-        composeTestRule.onNodeWithTag("year").assert(hasText("2010"))
-        composeTestRule.onNode(containsStringCaseInsensitive("ReD")).assertExists()
-        composeTestRule.onNodeWithTag("title").assertContainsIgnoreCase("rEd")
+        composeTestRule.onNodeWithTag("year").assert(hasText("2021"))
+        composeTestRule.onNode(containsStringCaseInsensitive("ReD Notice")).assertExists()
+        composeTestRule.onNodeWithTag("title").assertContainsIgnoreCase("rEd notice")
     }
 
     @Test
@@ -154,7 +154,7 @@ class DroidflixInstrumentedTests {
         val expectedIntent = allOf(
             hasAction(Intent.ACTION_SEND),
             hasType("text/plain"),
-            hasExtra(Intent.EXTRA_TEXT, "https://www.imdb.com/title/tt1245526")
+            hasExtra(Intent.EXTRA_TEXT, "https://www.imdb.com/title/tt7991608")
         )
 
         val chooserIntent = allOf(
